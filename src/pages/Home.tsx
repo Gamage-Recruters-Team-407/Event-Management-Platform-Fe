@@ -33,7 +33,7 @@ export default function Home() {
       >
         <div className="max-w-4xl mx-auto relative z-10">
           <span className="bg-indigo-500/30 text-indigo-200 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 inline-block backdrop-blur-sm">
-            ✨ Simplify Your Event Experience
+            Simplify Your Event Experience
           </span>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
             Discover & Book <br />
