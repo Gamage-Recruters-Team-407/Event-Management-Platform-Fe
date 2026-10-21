@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, MapPin, Clock, User, ArrowLeft } from "lucide-react";
 import { eventsData } from "../data/eventsData";
@@ -85,7 +84,7 @@ export default function EventDetails() {
             </div>
             <button
               onClick={() => navigate(`/book/${event.id}`)}
-              className="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition shadow-md shadow-indigo-100"
+              className="bg-[#5a2675] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#391053] transition shadow-md shadow-[#391053]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] focus-visible:ring-offset-2"
             >
               Book Tickets Now
             </button>

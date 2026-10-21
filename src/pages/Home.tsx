@@ -1,26 +1,31 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  Code,
-  Music,
   Briefcase,
-  MapPin,
   Calendar as CalendarIcon,
+  Code,
+  MapPin,
+  Music,
   Star,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { eventsData } from "../data/eventsData";
-// 1. import hero image
 import heroImg from "../assets/hero.jpg";
+
+const categories = [
+  { name: "Technology", icon: Code },
+  { name: "Music", icon: Music },
+  { name: "Business", icon: Briefcase },
+];
+
+const formatEventDate = (date: string) =>
+  new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00`));
 
 export default function Home() {
   const navigate = useNavigate();
-
-  const categories = [
-    { name: "Technology", icon: <Code className="w-6 h-6 text-indigo-600" /> },
-    { name: "Music", icon: <Music className="w-6 h-6 text-pink-600" /> },
-    { name: "Business", icon: <Briefcase className="w-6 h-6 text-blue-600" /> },
-  ];
 
   return (
     <div className="w-full pb-20 bg-gray-50/50">
@@ -33,7 +38,7 @@ export default function Home() {
       >
         <div className="max-w-4xl mx-auto relative z-10">
           <span className="bg-indigo-500/30 text-indigo-200 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 inline-block backdrop-blur-sm">
-            Simplify Your Event Experience
+            ✨ Simplify Your Event Experience
           </span>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
             Discover & Book <br />
@@ -51,107 +56,122 @@ export default function Home() {
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
+
+        <div className="absolute bottom-0 right-[10%] hidden h-28 w-px bg-gradient-to-b from-[#c9a8f1]/0 via-[#c9a8f1]/60 to-[#c9a8f1]/0 lg:block" />
       </section>
 
-      {/* 3. Categories Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
-        <div className="flex items-center gap-2 mb-8">
-          <Star className="w-5 h-5 text-indigo-600 fill-indigo-600" />
-          <h2 className="text-2xl font-bold text-gray-800">
-            Explore by Category
-          </h2>
+      <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[#9d72b3]">
+              Find your kind of event
+            </p>
+            <h2 className="text-2xl font-extrabold tracking-tight text-[#391053] sm:text-3xl">
+              Explore by category
+            </h2>
+          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {categories.map((cat, index) => (
-            <div
-              key={index}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
+          {categories.map(({ name, icon: Icon }) => (
+            <button
+              key={name}
+              type="button"
               onClick={() => navigate("/events")}
-              className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm hover:shadow-md hover:border-indigo-100 transition-all duration-300 cursor-pointer flex items-center gap-4 group"
+              className="group flex items-center gap-5 rounded-2xl border border-[#c9a8f1]/30 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#9d72b3]/60 hover:shadow-xl hover:shadow-[#391053]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] focus-visible:ring-offset-2 sm:p-6 motion-reduce:transform-none motion-reduce:transition-none"
             >
-              <div className="p-4 bg-indigo-50/50 rounded-xl group-hover:bg-indigo-50 transition-colors">
-                {cat.icon}
-              </div>
-              <span className="font-bold text-gray-700 text-lg group-hover:text-indigo-600 transition-colors">
-                {cat.name}
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#c9a8f1]/20 text-[#5a2675] transition-colors duration-300 group-hover:bg-[#5a2675] group-hover:text-white">
+                <Icon className="h-6 w-6" strokeWidth={1.8} />
               </span>
-            </div>
+              <span className="flex-1 text-lg font-bold text-[#391053]">
+                {name}
+              </span>
+              <ArrowRight className="h-5 w-5 text-[#9d72b3] transition-transform duration-300 group-hover:translate-x-1" />
+            </button>
           ))}
         </div>
       </section>
 
-      {/* 4. Featured Events Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="text-2xl font-bold text-gray-800">Featured Events</h2>
+      <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[#9d72b3]">
+              Handpicked for you
+            </p>
+            <h2 className="text-2xl font-extrabold tracking-tight text-[#391053] sm:text-3xl">
+              Featured events
+            </h2>
+          </div>
           <button
             onClick={() => navigate("/events")}
-            className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm inline-flex items-center gap-1 group"
+            className="group inline-flex shrink-0 items-center gap-2 rounded-sm pb-1 text-sm font-bold text-[#5a2675] transition-colors hover:text-[#9d72b3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] focus-visible:ring-offset-2"
           >
-            See All Events{" "}
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            See all events
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {eventsData &&
-            eventsData.map((event) => (
-              <div
-                key={event.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100/80 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group h-full"
-              >
-                <div className="relative overflow-hidden h-52">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <span className="absolute top-4 left-4 text-xs font-bold text-indigo-600 bg-white px-3 py-1.5 rounded-xl shadow-sm">
-                    {event.category}
-                  </span>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {eventsData.map((event) => (
+            <article
+              key={event.id}
+              className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#c9a8f1]/25 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#9d72b3]/50 hover:shadow-xl hover:shadow-[#391053]/10"
+            >
+              <div className="relative h-56 overflow-hidden bg-[#c9a8f1]/15">
+                <img
+                  src={event.image}
+                  alt={event.title}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#391053]/35 to-transparent" />
+                <span className="absolute left-4 top-4 rounded-full border border-white/70 bg-white/95 px-3 py-1.5 text-xs font-bold text-[#5a2675] shadow-sm backdrop-blur">
+                  {event.category}
+                </span>
+              </div>
+
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
+                <h3 className="mb-2 line-clamp-1 text-xl font-bold tracking-tight text-[#391053] transition-colors group-hover:text-[#5a2675]">
+                  {event.title}
+                </h3>
+                <p className="mb-5 line-clamp-2 text-sm leading-6 text-[#5a2675]/70">
+                  {event.description}
+                </p>
+
+                <div className="mb-5 mt-auto flex flex-col gap-3 text-sm text-[#5a2675]/80">
+                  <div className="flex items-center gap-2.5">
+                    <CalendarIcon className="h-4 w-4 shrink-0 text-[#9d72b3]" />
+                    <span className="font-medium">
+                      {formatEventDate(event.date)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <MapPin className="h-4 w-4 shrink-0 text-[#9d72b3]" />
+                    <span className="line-clamp-1 font-medium">
+                      {event.location}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="p-6 flex-grow flex flex-col">
-                  <h3 className="font-bold text-gray-800 text-xl mb-3 line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                    {event.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed">
-                    {event.description}
-                  </p>
-
-                  <div className="flex flex-col gap-3 text-sm text-gray-600 mb-6 mt-auto">
-                    <div className="flex items-center gap-2.5">
-                      <CalendarIcon className="w-4 h-4 text-indigo-500" />{" "}
-                      <span className="font-medium text-gray-700">
-                        {event.date}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <MapPin className="w-4 h-4 text-indigo-500" />{" "}
-                      <span className="font-medium text-gray-700 line-clamp-1">
-                        {event.location}
-                      </span>
-                    </div>
+                <div className="flex items-center justify-between gap-3 border-t border-[#c9a8f1]/25 pt-4">
+                  <div>
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#9d72b3]">
+                      Starting from
+                    </span>
+                    <span className="text-lg font-extrabold text-[#391053]">
+                      LKR {event.price.toLocaleString()}
+                    </span>
                   </div>
-
-                  <div className="pt-4 border-t border-gray-50 flex items-center justify-between mt-auto">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
-                        Price Starts From
-                      </span>
-                      <span className="font-black text-xl text-gray-800">
-                        LKR {event.price.toLocaleString()}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => navigate(`/event/${event.id}`)}
-                      className="text-sm bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-md shadow-indigo-100"
-                    >
-                      View Details
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => navigate(`/event/${event.id}`)}
+                    className="rounded-xl bg-[#5a2675] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#391053]/10 transition-all hover:-translate-y-0.5 hover:bg-[#391053] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
+                  >
+                    View details
+                  </button>
                 </div>
               </div>
-            ))}
+            </article>
+          ))}
         </div>
       </section>
     </div>

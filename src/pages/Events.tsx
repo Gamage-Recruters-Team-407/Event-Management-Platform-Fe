@@ -1,120 +1,228 @@
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Search,
-  MapPin,
   Calendar as CalendarIcon,
+  MapPin,
+  Search,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 import { eventsData } from "../data/eventsData";
+
+const formatEventDate = (date: string) =>
+  new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00`));
 
 export default function Events() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedDate, setSelectedDate] = useState("");
 
-  // Filter and search events based on search term and selected category
+  const categories = useMemo(
+    () => [...new Set(eventsData.map((event) => event.category))].sort(),
+    [],
+  );
+
   const filteredEvents = eventsData.filter((event) => {
+    const query = searchTerm.trim().toLowerCase();
     const matchesSearch =
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchTerm.toLowerCase());
+      !query ||
+      event.title.toLowerCase().includes(query) ||
+      event.location.toLowerCase().includes(query) ||
+      event.category.toLowerCase().includes(query);
     const matchesCategory =
       selectedCategory === "All" || event.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesDate = !selectedDate || event.date === selectedDate;
+
+    return matchesSearch && matchesCategory && matchesDate;
   });
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("All");
+    setSelectedDate("");
+  };
+
+  const hasFilters =
+    searchTerm.trim() !== "" || selectedCategory !== "All" || selectedDate !== "";
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">
-        Explore All Events
-      </h1>
-      <p className="text-gray-500 mb-8">
-        Find and book the best upcoming experiences near you.
-      </p>
-
-      {/* Search and Filters Bar */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center mb-10 w-full">
-        {/* Search Input */}
-        <div className="relative w-full md:flex-grow">
-          <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-          <input
-            type="text"
-            placeholder="Search by event name or venue..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-gray-50 pl-10 pr-4 py-2..5 rounded-lg border border-gray-200 focus:outline-none focus:border-indigo-500 text-sm"
-          />
-        </div>
-
-        {/* Category Filter */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <SlidersHorizontal className="w-5 h-5 text-gray-400 hidden md:block" />
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full md:w-48 bg-gray-50 px-3 py-2..5 rounded-lg border border-gray-200 focus:outline-none focus:border-indigo-500 text-sm font-medium text-gray-700 cursor-pointer"
-          >
-            <option value="All">All Categories</option>
-            <option value="Technology">Technology</option>
-            <option value="Music">Music</option>
-            <option value="Business">Business</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Events Grid Layout */}
-      {filteredEvents.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {filteredEvents.map((event) => (
-            <div
-              key={event.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col"
-            >
-              <img
-                src={event.image}
-                alt={event.title}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-5 flex-grow flex flex-col">
-                <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded w-max mb-3">
-                  {event.category}
-                </span>
-                <h3 className="font-bold text-gray-800 text-lg mb-2 line-clamp-1">
-                  {event.title}
-                </h3>
-                <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                  {event.description}
-                </p>
-                <div className="flex flex-col gap-2 text-xs text-gray-600 mb-5">
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="w-4 h-4 text-gray-400" />{" "}
-                    {event.date}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-400" />{" "}
-                    {event.location}
-                  </div>
-                </div>
-                <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
-                  <span className="font-bold text-gray-800">
-                    LKR {event.price.toLocaleString()}
-                  </span>
-                  <button
-                    onClick={() => navigate(`/event/${event.id}`)}
-                    className="text-xs bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
+    <div className="min-h-screen bg-[#c9a8f1]/[0.08]">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <header className="mb-8 sm:mb-10">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[#9d72b3]">
+            Make room for something memorable
+          </p>
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-[#391053] sm:text-4xl">
+                Explore events
+              </h1>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[#5a2675]/70 sm:text-base">
+                Discover inspiring experiences, meet your people, and find your
+                next favorite event.
+              </p>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-20 text-gray-400 font-medium">
-          No events found matching your search.
-        </div>
-      )}
+            <p className="shrink-0 text-sm font-semibold text-[#5a2675]/70">
+              {filteredEvents.length}{" "}
+              {filteredEvents.length === 1 ? "event" : "events"} to explore
+            </p>
+          </div>
+        </header>
+
+        <section
+          aria-label="Search and filter events"
+          className="mb-8 rounded-2xl border border-[#c9a8f1]/30 bg-white p-3 shadow-[0_12px_35px_rgba(57,16,83,0.06)] sm:p-4"
+        >
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px_200px_auto] md:items-center">
+            <label className="relative block">
+              <span className="sr-only">Search events by name, venue, or category</span>
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9d72b3]"
+              />
+              <input
+                type="search"
+                placeholder="Search by event name, venue, or category..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className="h-12 w-full rounded-xl border border-[#c9a8f1]/35 bg-[#c9a8f1]/[0.08] pl-12 pr-4 text-sm text-[#391053] outline-none transition placeholder:text-[#5a2675]/45 focus:border-[#9d72b3] focus:bg-white focus:ring-4 focus:ring-[#c9a8f1]/25"
+              />
+            </label>
+
+            <label className="relative flex h-12 items-center gap-3 rounded-xl border border-[#c9a8f1]/35 bg-[#c9a8f1]/[0.08] px-3 transition focus-within:border-[#9d72b3] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#c9a8f1]/25">
+              <SlidersHorizontal
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0 text-[#9d72b3]"
+              />
+              <span className="sr-only">Filter by category</span>
+              <select
+                value={selectedCategory}
+                onChange={(event) => setSelectedCategory(event.target.value)}
+                className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-1 text-sm font-semibold text-[#391053] outline-none"
+              >
+                <option value="All">All categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none text-xs text-[#9d72b3]"
+              >
+                ▾
+              </span>
+            </label>
+
+            <label className="relative flex h-12 items-center gap-3 rounded-xl border border-[#c9a8f1]/35 bg-[#c9a8f1]/[0.08] px-3 transition focus-within:border-[#9d72b3] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#c9a8f1]/25">
+              <CalendarIcon
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0 text-[#9d72b3]"
+              />
+              <span className="sr-only">Filter by event date</span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(event) => setSelectedDate(event.target.value)}
+                className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#391053] outline-none"
+              />
+            </label>
+
+            <button
+              type="button"
+              onClick={clearFilters}
+              disabled={!hasFilters}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[#5a2675] transition hover:bg-[#c9a8f1]/20 hover:text-[#391053] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <X className="h-4 w-4" />
+              Clear
+            </button>
+          </div>
+        </section>
+
+        {filteredEvents.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredEvents.map((event) => (
+              <article
+                key={event.id}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#c9a8f1]/25 bg-white shadow-[0_4px_18px_rgba(57,16,83,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#9d72b3]/55 hover:shadow-xl hover:shadow-[#391053]/10 motion-reduce:transform-none motion-reduce:transition-none"
+              >
+                <div className="relative h-52 overflow-hidden bg-[#c9a8f1]/20">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#391053]/35 to-transparent" />
+                  <span className="absolute left-4 top-4 rounded-lg border border-[#c9a8f1]/40 bg-[#c9a8f1]/90 px-3 py-1.5 text-xs font-bold text-[#391053] shadow-sm backdrop-blur-sm">
+                    {event.category}
+                  </span>
+                </div>
+
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <h2 className="mb-2 line-clamp-1 text-lg font-bold tracking-tight text-[#391053]">
+                    {event.title}
+                  </h2>
+                  <p className="mb-5 line-clamp-2 min-h-10 text-sm leading-5 text-[#5a2675]/70">
+                    {event.description}
+                  </p>
+
+                  <div className="mb-5 flex flex-col gap-3 text-sm text-[#5a2675]/80">
+                    <div className="flex items-center gap-2.5">
+                      <CalendarIcon className="h-4 w-4 shrink-0 text-[#9d72b3]" />
+                      <span>{formatEventDate(event.date)}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <MapPin className="h-4 w-4 shrink-0 text-[#9d72b3]" />
+                      <span className="line-clamp-1">{event.location}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-auto flex items-center justify-between gap-3 border-t border-[#c9a8f1]/25 pt-4">
+                    <span className="text-lg font-extrabold text-[#391053]">
+                      LKR {event.price.toLocaleString()}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/event/${event.id}`)}
+                      className="rounded-xl bg-[#5a2675] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#391053]/15 transition-all hover:-translate-y-0.5 hover:bg-[#391053] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
+                    >
+                      View details
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-[#9d72b3]/45 bg-white px-6 py-16 text-center shadow-sm">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#c9a8f1]/25 text-[#5a2675]">
+              <Search className="h-6 w-6" />
+            </div>
+            <h2 className="text-lg font-bold text-[#391053]">
+              No events match those filters
+            </h2>
+            <p className="mt-2 text-sm text-[#5a2675]/70">
+              Try a different search or clear your filters to see all events.
+            </p>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-5 rounded-xl bg-[#5a2675] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#391053] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] focus-visible:ring-offset-2"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
