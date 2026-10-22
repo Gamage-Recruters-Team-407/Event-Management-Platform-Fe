@@ -21,25 +21,30 @@ export default function Events() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedDate, setSelectedDate] = useState("");
+  const query = searchTerm.trim().toLowerCase();
 
   const categories = useMemo(
     () => [...new Set(eventsData.map((event) => event.category))].sort(),
     [],
   );
 
-  const filteredEvents = eventsData.filter((event) => {
-    const query = searchTerm.trim().toLowerCase();
-    const matchesSearch =
-      !query ||
-      event.title.toLowerCase().includes(query) ||
-      event.location.toLowerCase().includes(query) ||
-      event.category.toLowerCase().includes(query);
-    const matchesCategory =
-      selectedCategory === "All" || event.category === selectedCategory;
-    const matchesDate = !selectedDate || event.date === selectedDate;
+  const filteredEvents = useMemo(
+    () =>
+      eventsData.filter((event) => {
+        const matchesSearch =
+          !query ||
+          event.title.toLowerCase().includes(query) ||
+          event.location.toLowerCase().includes(query) ||
+          event.category.toLowerCase().includes(query) ||
+          event.organizer.toLowerCase().includes(query);
+        const matchesCategory =
+          selectedCategory === "All" || event.category === selectedCategory;
+        const matchesDate = !selectedDate || event.date === selectedDate;
 
-    return matchesSearch && matchesCategory && matchesDate;
-  });
+        return matchesSearch && matchesCategory && matchesDate;
+      }),
+    [query, selectedCategory, selectedDate],
+  );
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -87,7 +92,7 @@ export default function Events() {
               />
               <input
                 type="search"
-                placeholder="Search by event name, venue, or category..."
+                placeholder="Search name, venue, category, or organizer..."
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 className="h-12 w-full rounded-xl border border-[#c9a8f1]/35 bg-[#c9a8f1]/[0.08] pl-12 pr-4 text-sm text-[#391053] outline-none transition placeholder:text-[#5a2675]/45 focus:border-[#9d72b3] focus:bg-white focus:ring-4 focus:ring-[#c9a8f1]/25"
