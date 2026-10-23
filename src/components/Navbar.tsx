@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Calendar, Menu, X } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `relative py-2 text-sm font-semibold transition-colors duration-200 ${
@@ -44,6 +45,7 @@ export default function Navbar() {
             <NavLink to="/my-tickets" className={navLinkClass}>
               My Tickets
             </NavLink>
+            <ThemeToggle />
             <Link
               to="/events"
               className="rounded-xl bg-[#5a2675] px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#391053]/15 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#391053] hover:shadow-lg hover:shadow-[#391053]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
@@ -52,16 +54,25 @@ export default function Navbar() {
             </Link>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsOpen((open) => !open)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-[#391053] transition-colors hover:bg-[#c9a8f1]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3] md:hidden"
-            aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={isOpen}
-            aria-controls="mobile-navigation"
-          >
-            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <div className="flex items-center gap-1 md:hidden">
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={() => setIsOpen((open) => !open)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-[#391053] transition-colors hover:bg-[#c9a8f1]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9d72b3]"
+              aria-label={
+                isOpen ? "Close navigation menu" : "Open navigation menu"
+              }
+              aria-expanded={isOpen}
+              aria-controls="mobile-navigation"
+            >
+              {isOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

@@ -10,12 +10,14 @@ import {
   Mail,
   MapPin,
   Minus,
+  Phone,
   Plus,
   ShieldCheck,
   Ticket,
   UserRound,
 } from "lucide-react";
 import { eventsData } from "../data/eventsData";
+import { useToast } from "../contexts/AppHooks";
 
 type TicketType = "Standard" | "VIP";
 
@@ -26,6 +28,57 @@ interface Purchase {
   quantity: number;
   total: number;
 }
+
+type BookingField = "name" | "email" | "phone";
+type BookingErrors = Partial<Record<BookingField, string>>;
+
+const validateBooking = (
+  name: string,
+  email: string,
+  phone: string,
+): BookingErrors => {
+  const errors: BookingErrors = {};
+  const trimmedName = name.trim();
+  const trimmedEmail = email.trim();
+  const trimmedPhone = phone.trim();
+  const namePattern = /^[\p{L}\p{M}]+(?:[ .'-][\p{L}\p{M}]+)*$/u;
+
+  if (!trimmedName) {
+    errors.name = "Enter your full name.";
+  } else if (
+    trimmedName.length < 2 ||
+    trimmedName.length > 100 ||
+    !namePattern.test(trimmedName)
+  ) {
+    errors.name =
+      "Use 2–100 characters with letters, spaces, apostrophes, periods, or hyphens.";
+  }
+
+  if (!trimmedEmail) {
+    errors.email = "Enter your email address.";
+  } else if (
+    trimmedEmail.length > 254 ||
+    !/^(?!\.)(?!.*\.\.)[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z]{2,63})+$/i.test(
+      trimmedEmail,
+    )
+  ) {
+    errors.email = "Enter a valid email address, such as you@example.com.";
+  }
+
+  const digits = trimmedPhone.replace(/\D/g, "");
+  if (!trimmedPhone) {
+    errors.phone = "Enter your phone number.";
+  } else if (
+    !/^\+?[0-9\s().-]+$/.test(trimmedPhone) ||
+    digits.length < 7 ||
+    digits.length > 15
+  ) {
+    errors.phone =
+      "Enter a valid phone number with 7–15 digits; you may include a leading +.";
+  }
+
+  return errors;
+};
 
 const formatPrice = (amount: number) =>
   new Intl.NumberFormat("en-LK", {
@@ -52,9 +105,12 @@ export default function Booking() {
   const [quantity, setQuantity] = useState(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [ticketType, setTicketType] = useState<TicketType>("Standard");
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<BookingErrors>({});
   const [purchase, setPurchase] = useState<Purchase | null>(null);
+  const { showToast } = useToast();
 
   if (!event) {
     return (
@@ -85,8 +141,15 @@ export default function Booking() {
 
     const attendeeName = name.trim();
     const attendeeEmail = email.trim();
-    if (!attendeeName || !attendeeEmail) {
-      setError("Enter your full name and email address to continue.");
+    const attendeePhone = phone.trim();
+    const validationErrors = validateBooking(
+      attendeeName,
+      attendeeEmail,
+      attendeePhone,
+    );
+    setFieldErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      showToast("Please correct the highlighted booking details.", "error");
       return;
     }
 
@@ -97,9 +160,10 @@ export default function Booking() {
         : [];
 
       if (!Array.isArray(currentTickets)) {
-        setError(
-          "Your saved ticket data could not be read. Please resolve it before placing this order.",
-        );
+        const storageError =
+          "Your saved ticket data could not be read. Please resolve it before placing this order.";
+        setError(storageError);
+        showToast(storageError, "error");
         return;
       }
 
@@ -113,6 +177,7 @@ export default function Booking() {
         image: event.image,
         attendeeName,
         email: attendeeEmail,
+        phone: attendeePhone,
         ticketType,
       };
 
@@ -128,9 +193,10 @@ export default function Booking() {
         total,
       });
     } catch {
-      setError(
-        "We couldn't save your booking in this browser. Check your storage settings and try again.",
-      );
+      const storageError =
+        "We couldn't save your booking in this browser. Check your storage settings and try again.";
+      setError(storageError);
+      showToast(storageError, "error");
     }
   };
 
@@ -272,6 +338,7 @@ export default function Booking() {
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.9fr)] lg:gap-8">
           <form
             onSubmit={handleSubmit}
+            noValidate
             className="rounded-3xl border border-[#c9a8f1]/35 bg-white p-5 shadow-[0_18px_55px_rgba(57,16,83,0.08)] sm:p-8"
           >
             <div className="mb-7 flex items-start gap-4 border-b border-[#c9a8f1]/30 pb-6">
@@ -300,18 +367,40 @@ export default function Booking() {
                   />
                   <input
                     autoComplete="name"
-                    className="h-12 w-full rounded-xl border border-[#c9a8f1]/55 bg-white py-3 pl-11 pr-4 text-sm text-[#391053] outline-none transition-all duration-300 placeholder:text-[#5a2675]/40 hover:border-[#9d72b3]/70 focus:border-[#9d72b3] focus:ring-4 focus:ring-[#9d72b3]/15"
                     maxLength={100}
                     name="name"
-                    onChange={(changeEvent) =>
-                      setName(changeEvent.target.value)
-                    }
+                    onChange={(changeEvent) => {
+                      const value = changeEvent.target.value;
+                      setName(value);
+                      if (fieldErrors.name) {
+                        setFieldErrors((currentErrors) => ({
+                          ...currentErrors,
+                          name: validateBooking(value, email, phone).name,
+                        }));
+                      }
+                    }}
                     placeholder="e.g. Alex Morgan"
-                    required
                     type="text"
                     value={name}
+                    aria-invalid={Boolean(fieldErrors.name)}
+                    aria-describedby={
+                      fieldErrors.name ? "name-error" : undefined
+                    }
+                    className={`h-12 w-full rounded-xl border bg-white py-3 pl-11 pr-4 text-sm text-[#391053] outline-none transition-all duration-300 placeholder:text-[#5a2675]/40 hover:border-[#9d72b3]/70 focus:border-[#9d72b3] focus:ring-4 focus:ring-[#9d72b3]/15 ${
+                      fieldErrors.name
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500/15"
+                        : "border-[#c9a8f1]/55"
+                    }`}
                   />
                 </span>
+                {fieldErrors.name && (
+                  <span
+                    id="name-error"
+                    className="mt-2 block text-xs font-medium text-red-700"
+                  >
+                    {fieldErrors.name}
+                  </span>
+                )}
               </label>
 
               <label className="block">
@@ -325,21 +414,98 @@ export default function Booking() {
                   />
                   <input
                     autoComplete="email"
-                    className="w-full rounded-xl border border-[#c9a8f1]/55 bg-white py-3 pl-11 pr-4 text-sm text-[#391053] outline-none transition-all duration-300 placeholder:text-[#5a2675]/40 hover:border-[#9d72b3]/70 focus:border-[#9d72b3] focus:ring-4 focus:ring-[#9d72b3]/15"
                     maxLength={254}
                     name="email"
-                    onChange={(changeEvent) =>
-                      setEmail(changeEvent.target.value)
-                    }
+                    onChange={(changeEvent) => {
+                      const value = changeEvent.target.value;
+                      setEmail(value);
+                      if (fieldErrors.email) {
+                        setFieldErrors((currentErrors) => ({
+                          ...currentErrors,
+                          email: validateBooking(name, value, phone).email,
+                        }));
+                      }
+                    }}
                     placeholder="you@example.com"
-                    required
                     type="email"
                     value={email}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={
+                      fieldErrors.email ? "email-error" : undefined
+                    }
+                    className={`w-full rounded-xl border bg-white py-3 pl-11 pr-4 text-sm text-[#391053] outline-none transition-all duration-300 placeholder:text-[#5a2675]/40 hover:border-[#9d72b3]/70 focus:border-[#9d72b3] focus:ring-4 focus:ring-[#9d72b3]/15 ${
+                      fieldErrors.email
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500/15"
+                        : "border-[#c9a8f1]/55"
+                    }`}
                   />
                 </span>
+                {fieldErrors.email && (
+                  <span
+                    id="email-error"
+                    className="mt-2 block text-xs font-medium text-red-700"
+                  >
+                    {fieldErrors.email}
+                  </span>
+                )}
                 <span className="mt-2 block text-xs text-[#5a2675]/60">
                   Your booking details will be saved in this browser.
                 </span>
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-[#391053]">
+                  Phone number
+                </span>
+                <span className="relative block">
+                  <Phone
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9d72b3]"
+                  />
+                  <input
+                    autoComplete="tel"
+                    aria-describedby={
+                      fieldErrors.phone ? "phone-error" : "phone-hint"
+                    }
+                    aria-invalid={Boolean(fieldErrors.phone)}
+                    inputMode="tel"
+                    maxLength={25}
+                    name="phone"
+                    onChange={(changeEvent) => {
+                      const value = changeEvent.target.value;
+                      setPhone(value);
+                      if (fieldErrors.phone) {
+                        setFieldErrors((currentErrors) => ({
+                          ...currentErrors,
+                          phone: validateBooking(name, email, value).phone,
+                        }));
+                      }
+                    }}
+                    placeholder="+94 77 123 4567"
+                    type="tel"
+                    value={phone}
+                    className={`h-12 w-full rounded-xl border bg-white py-3 pl-11 pr-4 text-sm text-[#391053] outline-none transition-all duration-300 placeholder:text-[#5a2675]/40 hover:border-[#9d72b3]/70 focus:border-[#9d72b3] focus:ring-4 focus:ring-[#9d72b3]/15 ${
+                      fieldErrors.phone
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500/15"
+                        : "border-[#c9a8f1]/55"
+                    }`}
+                  />
+                </span>
+                {fieldErrors.phone ? (
+                  <span
+                    id="phone-error"
+                    className="mt-2 block text-xs font-medium text-red-700"
+                  >
+                    {fieldErrors.phone}
+                  </span>
+                ) : (
+                  <span
+                    id="phone-hint"
+                    className="mt-2 block text-xs text-[#5a2675]/60"
+                  >
+                    Include your country code if you are outside Sri Lanka.
+                  </span>
+                )}
               </label>
 
               <div className="grid gap-5 sm:grid-cols-2">

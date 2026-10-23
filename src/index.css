@@ -1,3 +1,124 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html {
+  color-scheme: light;
+}
+
+body {
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body,
+html.dark #root > div {
+  background-color: #17111d;
+  color: #f4ecfa;
+}
+
+html.dark [class~="bg-white"],
+html.dark [class~="bg-white/85"],
+html.dark [class~="bg-white/95"] {
+  background-color: #241b2c !important;
+  transition: background-color 200ms ease;
+}
+
+html.dark [class~="bg-gray-50"],
+html.dark [class~="bg-gray-50/50"],
+html.dark [class*="bg-gray-"],
+html.dark [class*="bg-[#c9a8f1]"] {
+  background-color: #1c1523 !important;
+  transition: background-color 200ms ease;
+}
+
+html.dark [class*="text-[#391053]"],
+html.dark [class*="text-[#5a2675]"],
+html.dark [class*="text-gray-"] {
+  color: #eee3f7 !important;
+  transition: color 200ms ease;
+}
+
+html.dark [class*="border-[#c9a8f1]"],
+html.dark [class*="border-[#9d72b3]"],
+html.dark [class*="border-gray-"] {
+  border-color: #493653 !important;
+}
+
+html.dark [class*="placeholder:text-[#5a2675]"]::placeholder {
+  color: #b9a8c8;
+}
+
+html.dark select,
+html.dark option {
+  background-color: #241b2c;
+  color: #eee3f7;
+}
+
+.animate-toast-in {
+  animation: toast-in 180ms ease-out both;
+}
+
+.page-enter {
+  animation: page-enter 220ms ease-out both;
+}
+
+.theme-toggle-icon {
+  animation: theme-toggle 220ms ease-out both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes theme-toggle {
+  from {
+    opacity: 0.35;
+    transform: rotate(-35deg) scale(0.75);
+  }
+
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .page-enter,
+  .theme-toggle-icon {
+    animation: none;
+  }
+}

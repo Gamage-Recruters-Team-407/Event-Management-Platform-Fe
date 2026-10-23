@@ -1,21 +1,29 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Events from "./pages/Events";
 import EventDetails from "./pages/EventDetails";
 import Booking from "./pages/Booking";
 import MyTickets from "./pages/MyTickets";
+import { FavoriteProvider } from "./contexts/FavoriteContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { ToastProvider } from "./contexts/ToastContext";
 
-export default function App() {
+function AppLayout() {
+  const location = useLocation();
+
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        {/* Navigation Bar */}
-        <Navbar />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
 
-        {/* Main Content Pages */}
-        <main className="flex-grow">
+      <main className="flex-grow">
+        <div key={location.pathname} className="page-enter">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
@@ -23,8 +31,23 @@ export default function App() {
             <Route path="/book/:id" element={<Booking />} />
             <Route path="/my-tickets" element={<MyTickets />} />
           </Routes>
-        </main>
-      </div>
-    </Router>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <ThemeProvider>
+        <FavoriteProvider>
+          <Router>
+            <AppLayout />
+          </Router>
+        </FavoriteProvider>
+      </ThemeProvider>
+    </ToastProvider>
   );
 }

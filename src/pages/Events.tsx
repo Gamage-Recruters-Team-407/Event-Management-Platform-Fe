@@ -8,6 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { eventsData } from "../data/eventsData";
+import FavoriteButton from "../components/FavoriteButton";
 
 const formatEventDate = (date: string) =>
   new Intl.DateTimeFormat("en", {
@@ -167,6 +168,7 @@ export default function Events() {
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#391053]/35 to-transparent" />
+                  <FavoriteButton eventId={event.id} eventTitle={event.title} />
                   <span className="absolute left-4 top-4 rounded-lg border border-[#c9a8f1]/40 bg-[#c9a8f1]/90 px-3 py-1.5 text-xs font-bold text-[#391053] shadow-sm backdrop-blur-sm">
                     {event.category}
                   </span>
